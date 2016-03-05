@@ -1,102 +1,132 @@
-from math import pi, cos, sin, radians
+# square.logo -> OK
 
+
+
+from math import pi, cos, sin, radians
+import sys
 
 def main():
-    global svgtowrite
-    svgtowrite = list()
-    instructions = list()
+    global LOGO_STROKES
+    LOGO_STROKES = ["black", "blue", "green", "cyan", "red", "magenta", "yellow", "white", "brown", "tan", "green", "aqua",
+                   "salmon", "purple", "orange", "grey"]
 
-    points = list()
-    points.append((100.0, 100.0))
+    filename_LOGO = "LOGO-ELDLC.logo"   # Nom du fichier LOGO
+    filename_SVG = "LOGO-ELDLC.svg"     # Nom du fichier SVG
 
-    max_x = 0.0
-    max_y = 0.0
+    global repeat_start
+    global nb_left_repeat
 
-    angle = 0.0
+    repeat_start = [] # liste contenant l'indice du premier token de chaque REPEAT
+    nb_left_repeat = [] # liste contenant le nombre de répétitions restantes pour chaque REPEAT
 
-    color = "black"
+    segments = []  # Liste des segments [ ((x1, y1), (x2, y2), stroke, stroke-width, writing), (...), (...) ]
 
-    with open("LOGO-ELDLC.logo") as p:
-        initsvgfile()
-
-        instructions = p.read().split()
-
-
-        max_x, max_y = process(instructions, points, color, angle, max_x, max_y)
+    instructions = read_logo(filename_LOGO)   # Liste des instructions
+    process_instructions(instructions, segments)
+    write_svg(segments, filename_SVG)
 
 
-        endsvgfile(max_x, max_y)
-        writesvgfile()
+def read_logo(filename):
+    with open(filename) as READER_LOGO:
+        return READER_LOGO.read().replace("[", " [ ").replace("]", " ] ").split()
 
 
-
-def forward(distance, point, color, angle):
-    new_x = point[0] + distance * cos(angle)
-    new_y = point[1] + distance * sin(angle)
-    svgtowrite.append("<line x1=\"" + str(point[0]) + "\" y1=\"" + str(point[1]) + "\" x2=\"" + str(new_x) + "\"" + " y2=\"" + str(new_y) + "\"" + " stroke=\"black\"/>\n")
-    return new_x, new_y
+def process_instructions(instructions, segments, angle=0, stroke="black", stroke_width=1, writing=True, iInstruction=0, iPoint=0,
+                         iRepeat=-1, test=1):
+    test += 1
 
 
-def initsvgfile():
-    svgtowrite.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
-    svgtowrite.append("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"200\" height=\"200\">\n")
-    svgtowrite.append("<title>Exemple LOGO</title>\n")
-    svgtowrite.append("<desc>Du LOGO.</desc>\n")
+    if iInstruction < len(instructions):
+        commande = instructions[iInstruction].upper()
 
+        if iRepeat > -1 and commande == "]":
+            nb_left_repeat[iRepeat] -= 1
 
-def endsvgfile(max_x, max_y):
-    svgtowrite[1] = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"" + str(max_x) + "\" height=\"" + str(max_y) + "\">\n"
-    svgtowrite.append("</svg>")
+            if nb_left_repeat[iRepeat] == 0:
+                iInstruction += 1
+                iRepeat -= 1
+                nb_left_repeat.pop()
+                repeat_start.pop()
+            else:
+                iInstruction = repeat_start[iRepeat]
 
-
-def writesvgfile():
-    with open("file.svg", "w") as f:
-        f.writelines(svgtowrite)
-
-
-def process(instructions, points, color, angle, max_x, max_y, iPoint=0, iInstruction=0):
-    if len(instructions) != 0:
-        nbrepeat_new = None
-
-        print(iInstruction)
-        command = instructions[iInstruction]
-        distance = instructions[iInstruction+1]
-
-        command = command.replace("[", "")
-        distance = distance.replace("]", "")
-
-        distance = float(distance)
-
-        if command == "FORWARD":
-            iPoint += 1
-            points.insert(iPoint, forward(distance, points[iPoint-1], color, angle))
-            if points[iPoint][0] > max_x:
-                max_x = points[iPoint][0]
-            if points[iPoint][1] > max_y:
-                max_y = points[iPoint][1]
-
-        if command == "LEFT":
-            angle -= radians(distance)
-
-        if command == "RIGHT":
-            angle += radians(distance)
-
-        if command == "REPEAT":
-            nbrepeat_new = distance
-
-        nbrepeat -= 1
-
-        if nbrepeat_new != None:
-            nbrepeat = nbrepeat_new
-
-        if nbrepeat == 0 and nbrepeat_new == None:
-            return process(instructions, points, color, angle, max_x, max_y, 1, iPoint, iInstruction+2)
         else:
-            nbrepeat_new = None
-            return process(instructions, points, color, angle, max_x, max_y, nbrepeat, iPoint, iInstruction+2)
+            parametre = instructions[iInstruction+1]
+            print("{0} : {1} {2}".format(str(test), str(commande), str(parametre)))
+
+            if commande == "FORWARD" or commande == "FD":
+                parametre = float(parametre)
+
+                if len(segments) == 0:
+                    segments.append((
+                                     (100,100),
+                                     (100+parametre*cos(angle), 100+parametre*sin(angle)),
+                                     stroke,
+                                     stroke_width,
+                                     writing
+                                    ))
+                else:
+                    segments.append((
+                                     (segments[iPoint-1][1][0], segments[iPoint-1][1][1]),
+                                     (segments[iPoint-1][1][0]+parametre*cos(angle), segments[iPoint-1][1][1]+parametre*sin(angle)),
+                                     stroke,
+                                     stroke_width,
+                                     writing
+                                    ))
+
+                iPoint += 1
+                iInstruction += 2
+
+            elif commande == "LEFT" or commande == "LT":
+                angle -= radians(float(parametre))
+                iInstruction += 2
+
+            elif commande == "RIGHT" or commande == "RT":
+                angle += radians(float(parametre))
+                iInstruction += 2
+
+            elif commande == "PENCOLOR":
+                if parametre.lower() in LOGO_STROKES:
+                    stroke = parametre
+                iInstruction += 2
+
+            elif commande == "PENDOWN" or commande == "PD":
+                writing = True
+                iInstruction += 1
+
+            elif commande == "PENUP" or commande == "PU":
+                writing = False
+                iInstruction += 1
+
+            elif commande == "REPEAT":
+                nb_left_repeat.append(int(parametre))
+                iInstruction += 3
+                repeat_start.append(iInstruction)
+                iRepeat += 1
+
+            else:
+                print("Syntax error : {0} is not a valid command.".format(str(commande)))
+
+        process_instructions(instructions, segments, angle, stroke, stroke_width, writing, iInstruction, iPoint, iRepeat, test)
 
 
+def write_svg(segments, filename):
+    with open(filename, "w") as WRITER_SVG:
+        WRITER_SVG.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+        WRITER_SVG.write("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"20000\" height=\"20000\">\n")
+        WRITER_SVG.write("<title>Exemple LOGO</title>\n")
+        WRITER_SVG.write("<desc>Du LOGO.</desc>\n")
 
-    return max_x, max_y
+        for segment in segments:
+            if segment[4]:
+                WRITER_SVG.write(
+                    "<line x1=\"{0}\" y1=\"{1}\" x2=\"{2}\" y2=\"{3}\" stroke=\"{4}\" stroke-width=\"{5}\"/>\n".format(str(segment[0][0]),
+                                                                                                str(segment[0][1]),
+                                                                                                str(segment[1][0]),
+                                                                                                str(segment[1][1]),
+                                                                                                str(segment[2]),
+                                                                                                str(segment[3]))
+                    )
+        WRITER_SVG.write("</svg>")
 
 main()

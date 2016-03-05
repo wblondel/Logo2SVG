@@ -1,6 +1,9 @@
 ### Example user template template
 ### Example user template
 
+*.logo
+*.svg
+
 # IntelliJ project files
 .idea
 *.iml
