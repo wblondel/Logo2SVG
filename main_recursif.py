@@ -1,16 +1,13 @@
-# square.logo -> OK
-
-
-
 from math import pi, cos, sin, radians
 import sys
 
 def main():
+    sys.setrecursionlimit(3200)
     global LOGO_STROKES
     LOGO_STROKES = ["black", "blue", "green", "cyan", "red", "magenta", "yellow", "white", "brown", "tan", "green", "aqua",
                    "salmon", "purple", "orange", "grey"]
 
-    filename_LOGO = "LOGO-ELDLC.logo"   # Nom du fichier LOGO
+    filename_LOGO = "flower.logo"   # Nom du fichier LOGO
     filename_SVG = "LOGO-ELDLC.svg"     # Nom du fichier SVG
 
     global repeat_start
@@ -19,10 +16,13 @@ def main():
     repeat_start = [] # liste contenant l'indice du premier token de chaque REPEAT
     nb_left_repeat = [] # liste contenant le nombre de répétitions restantes pour chaque REPEAT
 
+
     segments = []  # Liste des segments [ ((x1, y1), (x2, y2), stroke, stroke-width, writing), (...), (...) ]
 
     instructions = read_logo(filename_LOGO)   # Liste des instructions
+
     process_instructions(instructions, segments)
+
     write_svg(segments, filename_SVG)
 
 
@@ -106,8 +106,11 @@ def process_instructions(instructions, segments, angle=0, stroke="black", stroke
 
             else:
                 print("Syntax error : {0} is not a valid command.".format(str(commande)))
+                iInstruction += 2
 
-        process_instructions(instructions, segments, angle, stroke, stroke_width, writing, iInstruction, iPoint, iRepeat, test)
+
+    process_instructions(instructions, segments, angle, stroke, stroke_width, writing, iInstruction, iPoint, iRepeat, test)
+
 
 
 def write_svg(segments, filename):
