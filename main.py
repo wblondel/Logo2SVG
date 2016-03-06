@@ -9,6 +9,8 @@ from random import randrange
 # Please read COMMANDS.md
 
 # TODO: Support parameters in procedures
+# TODO: Securely valuate mathematical expressions in parameters (eval is EVIL)
+# TODO: Optimize SVG
 
 def main():
     LOGO_STROKES = ["black", "blue", "green", "cyan", "red", "magenta", "yellow", "white", "brown", "tan", "green",
@@ -23,8 +25,8 @@ def main():
     repeat_start = []  # liste contenant l'indice du premier token de chaque REPEAT
     nb_left_repeat = []  # liste contenant le nombre de répétitions restantes pour chaque REPEAT
     segments = []  # Liste des segments [ ((x1, y1), (x2, y2), stroke, stroke-width, writing), (...), (...) ]
-    procedures = dict() # List of procedures (TO ...) et de leur point de départ
-    where_to_go_after_procedures = [] # Liste content l'indice de la commande à exécuter après la procédure finie
+    procedures = dict()  # List of procedures (TO ...) et de leur point de départ
+    where_to_go_after_procedures = []  # Liste content l'indice de la commande à exécuter après la procédure finie
 
     ###################
     # DEFAULT VALUE   #
@@ -69,7 +71,7 @@ def main():
 
                     if not error:
                         try:
-                            parameter = float(parameter[0])
+                            parameter = float(eval(parameter[0]))
                             if "B" in command:
                                 parameter = -parameter
 
@@ -105,7 +107,7 @@ def main():
 
                     if not error:
                         try:
-                            parameter = float(parameter[0])
+                            parameter = float(eval(parameter[0]))
 
                             if "R" in command:
                                 parameter = -parameter
@@ -123,7 +125,7 @@ def main():
 
                     if not error:
                         try:
-                            parameter = int(parameter[0])
+                            parameter = int(eval(parameter[0]))
 
                             if 0 <= parameter < len(LOGO_STROKES):
                                 stroke = LOGO_STROKES[parameter]
@@ -154,7 +156,7 @@ def main():
 
                     if not error:
                         try:
-                            stroke_width = int(parameter[0])
+                            stroke_width = int(eval(parameter[0]))
                         except:
                             print("Invalid parameter {0} for command {1}. Line width did not change.".format(
                                 str(parameter), str(command)))
@@ -176,7 +178,7 @@ def main():
 
                     if not error:
                         try:
-                            parameter = int(parameter[0])
+                            parameter = int(eval(parameter[0]))
                         except:
                             print("Invalid parameter {0} for command {1}. Repeat ignored.".format(str(parameter),
                                                                                                   str(command)))
