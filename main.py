@@ -1,4 +1,4 @@
-from math import pi, cos, sin, radians
+from math import cos, sin, radians
 from random import randrange
 
 # Created by William Gerald Blondel
