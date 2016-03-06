@@ -3,18 +3,22 @@
 ## Basic Commands
 ### fd x / forward x
 x : int or float
+
 Moves the turtle x pixels
 
 ### bk x / backward x
 x : int or float
+
 Moves the turtle back x pixels
 
 ### left x / lt x
 x : int or float
+
 Rotate the turtle left x degrees
 
 ### right x / rt x
 x : int or float
+
 Rotate the turtle right x degrees
 
 ## Controlling the pen
@@ -81,7 +85,9 @@ Will set the line color according to the following table:
 
 ### setpencolor r, g, b
 r : int
+
 g : int
+
 b : int
 
 Will set the line color according to the amount of red, green and blue.
@@ -89,4 +95,5 @@ Will set the line color according to the amount of red, green and blue.
 ## Math
 ### random x
 x : int
+
 Will choose a random number between 0 and x-1.
