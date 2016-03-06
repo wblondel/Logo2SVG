@@ -27,8 +27,8 @@ from math import cos, sin, radians
 from random import randrange
 
 def main():
-    LOGO_STROKES = ["black", "blue", "green", "cyan", "red", "magenta", "yellow", "white", "brown", "tan", "green",
-                    "aqua", "salmon", "purple", "orange", "grey"]
+    LOGO_STROKES = ["BLACK", "BLUE", "GREEN", "CYAN", "RED", "MAGENTA", "YELLOW", "WHITE", "BROWN", "TAN", "GREEN",
+                    "AQUA", "SALMON", "PURPLE", "ORANGE", "GREY"]
 
     LOGO_COMMANDS = ["FORWARD", "FD", "BACKWARD", "BK", "LEFT", "LT", "RIGHT", "RT", "SETPENCOLOR", "SETWIDTH",
                      "PENDOWN", "PD", "PENUP", "PU", "REPEAT", "RANDOM", "TO"]
@@ -66,7 +66,7 @@ def main():
 
     while True:
         if iCommand < len(commands):
-            command = commands[iCommand].upper()
+            command = commands[iCommand]
 
             if iRepeat > -1 and command == "]":
                 nb_left_repeat[iRepeat] -= 1
@@ -147,15 +147,17 @@ def main():
                                 print("Invalid parameter {0} for command {1}. Color did not change.".format(
                                     str(parameter), str(command)))
                         except:
+                            parameter = parameter[0]
                             if parameter.count(",") == 2:
                                 try:
                                     r, g, b = map(int, parameter.split(","))
                                     stroke = "#{0:02x}{1:02x}{2:02x}".format(clamp(r), clamp(g), clamp(b))
+                                    print(stroke)
                                 except ValueError:
                                     print("Invalid parameter {0} for command {1}. Color did not change.".format(
                                         str(parameter), str(command)))
                             else:
-                                if parameter.lower() in LOGO_STROKES:
+                                if parameter in LOGO_STROKES:
                                     stroke = parameter
                                 else:
                                     print("Invalid parameter {0} for command {1}. Color did not change.".format(
@@ -256,7 +258,16 @@ def main():
 
 def read_logo(filename):
     with open(filename) as READER_LOGO:
-        return READER_LOGO.read().replace("[", " [ ").replace("]", " ] ").upper().split()
+        content = READER_LOGO.read() # We read the file
+        content = content.replace("[", " [ ").replace("]", " ] ") # We replace [ by " [ "
+
+        while ", " in content:
+            content = content.replace(", ", ",") # We replace ", " by ","
+        while " ," in content:
+            content = content.replace(" ,", ",") # We replace " ," by ","
+
+        content = content.upper().split() # We UP everything and split
+        return content
 
 
 def get_min(segments):
@@ -342,7 +353,7 @@ def get_parameters(commands, iCommand, nb_of_parameters):
         for loop in range(nb_of_parameters):
             tmp = commands[iCommand + loop + 1]
 
-            if tmp.upper() == "RANDOM":
+            if tmp == "RANDOM":
                 try:
                     tmp = commands[iCommand + loop + 2]
                     tmp = randrange(int(tmp))
