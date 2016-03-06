@@ -1,9 +1,19 @@
-from math import cos, sin, radians
-from random import randrange
-
-# Created by William Gerald Blondel
+# Logo2SVG  Copyright (C) 2016    William Gerald Blondel
 # william.blondel78@gmail.com
 # Last modified 6th March 2016 00.00am
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # I don't use recursive function because of the maximum recursion depth
 # Please read COMMANDS.md
@@ -11,6 +21,10 @@ from random import randrange
 # TODO: Support parameters in procedures
 # TODO: Securely valuate mathematical expressions in parameters (eval is EVIL)
 # TODO: Optimize SVG
+
+
+from math import cos, sin, radians
+from random import randrange
 
 def main():
     LOGO_STROKES = ["black", "blue", "green", "cyan", "red", "magenta", "yellow", "white", "brown", "tan", "green",
