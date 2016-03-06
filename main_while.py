@@ -1,20 +1,30 @@
 from math import pi, cos, sin, radians
+from random import randrange
 
+# Created by William Gerald Blondel
+# william.blondel78@gmail.com
+# Last modified 6th March 2016 00.00am
 
-# I don't use recursive function because of the maximum recursion depth3
-
+# I don't use recursive function because of the maximum recursion depth
 # Please read COMMANDS.md
 
+# TODO: Support parameters in procedures
+
 def main():
-    LOGO_STROKES = ["black", "blue", "green", "cyan", "red", "magenta", "yellow", "white", "brown", "tan", "green", "aqua",
-                   "salmon", "purple", "orange", "grey"]
+    LOGO_STROKES = ["black", "blue", "green", "cyan", "red", "magenta", "yellow", "white", "brown", "tan", "green",
+                    "aqua", "salmon", "purple", "orange", "grey"]
 
-    filename_LOGO = "flower.logo"   # Nom du fichier LOGO
-    filename_SVG = "LOGO-ELDLC.svg"     # Nom du fichier SVG
+    LOGO_COMMANDS = ["FORWARD", "FD", "BACKWARD", "BK", "LEFT", "LT", "RIGHT", "RT", "SETPENCOLOR", "SETWIDTH",
+                     "PENDOWN", "PD", "PENUP", "PU", "REPEAT", "RANDOM", "TO"]
 
-    repeat_start = [] # liste contenant l'indice du premier token de chaque REPEAT
-    nb_left_repeat = [] # liste contenant le nombre de répétitions restantes pour chaque REPEAT
+    filename_LOGO = "flower.logo"  # Nom du fichier LOGO
+    filename_SVG = "LOGO-ELDLC.svg"  # Nom du fichier SVG
+
+    repeat_start = []  # liste contenant l'indice du premier token de chaque REPEAT
+    nb_left_repeat = []  # liste contenant le nombre de répétitions restantes pour chaque REPEAT
     segments = []  # Liste des segments [ ((x1, y1), (x2, y2), stroke, stroke-width, writing), (...), (...) ]
+    procedures = dict() # List of procedures (TO ...) et de leur point de départ
+    where_to_go_after_procedures = [] # Liste content l'indice de la commande à exécuter après la procédure finie
 
     ###################
     # DEFAULT VALUE   #
@@ -26,12 +36,13 @@ def main():
     iCommand = 0
     iPoint = 0
     iRepeat = -1
+    iProcedure = -1
 
     #########################
     # WE READ THE LOGO FILE #
     #########################
 
-    commands = read_logo(filename_LOGO)   # Liste des commands
+    commands = read_logo(filename_LOGO)  # Liste des commands
 
     ############################
     # WE PROCESS THE LOGO FILE #
@@ -54,7 +65,7 @@ def main():
 
             else:
                 if command == "FORWARD" or command == "FD" or command == "BACKWARD" or command == "BK":
-                    error, parameter = get_parameters(commands, iCommand, 1)
+                    error, parameter, random_switch = get_parameters(commands, iCommand, 1)
 
                     if not error:
                         try:
@@ -64,16 +75,17 @@ def main():
 
                             if len(segments) == 0:
                                 segments.append((
-                                    [100,100],
-                                    [100+parameter*cos(angle), 100+parameter*sin(angle)],
+                                    [100, 100],
+                                    [100 + parameter * cos(angle), 100 + parameter * sin(angle)],
                                     stroke,
                                     stroke_width,
                                     writing
                                 ))
                             else:
                                 segments.append((
-                                    [segments[iPoint-1][1][0], segments[iPoint-1][1][1]],
-                                    [segments[iPoint-1][1][0]+parameter*cos(angle), segments[iPoint-1][1][1]+parameter*sin(angle)],
+                                    [segments[iPoint - 1][1][0], segments[iPoint - 1][1][1]],
+                                    [segments[iPoint - 1][1][0] + parameter * cos(angle),
+                                     segments[iPoint - 1][1][1] + parameter * sin(angle)],
                                     stroke,
                                     stroke_width,
                                     writing
@@ -81,42 +93,45 @@ def main():
 
                             iPoint += 1
                         except:
-                            print("Invalid parameter {0} for command {1}. Turtle did not move.".format(str(parameter), str(command)))
+                            print("Invalid parameter {0} for command {1}. Turtle did not move.".format(str(parameter),
+                                                                                                       str(command)))
 
-                        iCommand += 2
+                        iCommand += 2+random_switch
                     else:
-                        iCommand += 1
+                        iCommand += 1+random_switch
 
                 elif command == "LEFT" or command == "LT":
-                    error, parameter = get_parameters(commands, iCommand, 1)
+                    error, parameter, random_switch = get_parameters(commands, iCommand, 1)
 
                     if not error:
                         try:
                             parameter = float(parameter[0])
                             angle -= radians(parameter)
                         except:
-                            print("Invalid parameter {0} for command {1}. Angle did not change.".format(str(parameter), str(command)))
+                            print("Invalid parameter {0} for command {1}. Angle did not change.".format(str(parameter),
+                                                                                                        str(command)))
 
-                        iCommand += 2
+                        iCommand += 2+random_switch
                     else:
-                        iCommand += 1
+                        iCommand += 1+random_switch
 
                 elif command == "RIGHT" or command == "RT":
-                    error, parameter = get_parameters(commands, iCommand, 1)
+                    error, parameter, random_switch = get_parameters(commands, iCommand, 1)
 
                     if not error:
                         try:
                             parameter = float(parameter[0])
                             angle += radians(parameter)
                         except:
-                            print("Invalid parameter {0} for command {1}. Angle did not change.".format(str(parameter), str(command)))
+                            print("Invalid parameter {0} for command {1}. Angle did not change.".format(str(parameter),
+                                                                                                        str(command)))
 
-                        iCommand += 2
+                        iCommand += 2+random_switch
                     else:
-                        iCommand += 1
+                        iCommand += 1+random_switch
 
-                elif command == "SETCOLOR":
-                    error, parameter = get_parameters(commands, iCommand, 1)
+                elif command == "SETPENCOLOR":
+                    error, parameter, random_switch = get_parameters(commands, iCommand, 1)
 
                     if not error:
                         try:
@@ -125,36 +140,40 @@ def main():
                             if 0 <= parameter < len(LOGO_STROKES):
                                 stroke = LOGO_STROKES[parameter]
                             else:
-                                print("Invalid parameter {0} for command {1}. Color did not change.".format(str(parameter), str(command)))
+                                print("Invalid parameter {0} for command {1}. Color did not change.".format(
+                                    str(parameter), str(command)))
                         except:
                             if parameter.count(",") == 2:
                                 try:
                                     r, g, b = map(int, parameter.split(","))
                                     stroke = "#{0:02x}{1:02x}{2:02x}".format(clamp(r), clamp(g), clamp(b))
                                 except ValueError:
-                                    print("Invalid parameter {0} for command {1}. Color did not change.".format(str(parameter), str(command)))
+                                    print("Invalid parameter {0} for command {1}. Color did not change.".format(
+                                        str(parameter), str(command)))
                             else:
                                 if parameter.lower() in LOGO_STROKES:
                                     stroke = parameter
                                 else:
-                                    print("Invalid parameter {0} for command {1}. Color did not change.".format(str(parameter), str(command)))
+                                    print("Invalid parameter {0} for command {1}. Color did not change.".format(
+                                        str(parameter), str(command)))
 
-                        iCommand += 2
+                        iCommand += 2+random_switch
                     else:
-                        iCommand += 1
+                        iCommand += 1+random_switch
 
                 elif command == "SETWIDTH":
-                    error, parameter = get_parameters(commands, iCommand, 1)
+                    error, parameter, random_switch = get_parameters(commands, iCommand, 1)
 
                     if not error:
                         try:
                             stroke_width = int(parameter[0])
                         except:
-                            print("Invalid parameter {0} for command {1}. Line width did not change.".format(str(parameter), str(command)))
+                            print("Invalid parameter {0} for command {1}. Line width did not change.".format(
+                                str(parameter), str(command)))
 
-                        iCommand += 2
+                        iCommand += 2+random_switch
                     else:
-                        iCommand += 1
+                        iCommand += 1+random_switch
 
                 elif command == "PENDOWN" or command == "PD":
                     writing = True
@@ -165,21 +184,51 @@ def main():
                     iCommand += 1
 
                 elif command == "REPEAT":
-                    error, parameter = get_parameters(commands, iCommand, 1)
+                    error, parameter, random_switch = get_parameters(commands, iCommand, 1)
 
                     if not error:
                         try:
                             parameter = int(parameter[0])
                         except:
-                            print("Invalid parameter {0} for command {1}. Repeat ignored.".format(str(parameter), str(command)))
-                            iCommand += 1
+                            print("Invalid parameter {0} for command {1}. Repeat ignored.".format(str(parameter),
+                                                                                                  str(command)))
+                            iCommand += 1+random_switch
                         else:
                             nb_left_repeat.append(parameter)
-                            iCommand += 3
+                            iCommand += 3+random_switch
                             repeat_start.append(iCommand)
                             iRepeat += 1
                     else:
-                        iCommand += 1
+                        iCommand += 1+random_switch
+
+                elif command == "TO":
+                    error, parameter, random_switch = get_parameters(commands, iCommand, 1)
+
+                    if not error:
+                        parameter = parameter[0]
+
+                        if parameter in LOGO_COMMANDS:
+                            print("Invalid procedure name. {0} is a reserved keyword.".format(str(parameter)))
+                            iCommand += 2
+                        else:
+                            procedures[parameter] = iCommand+2
+
+                            try:
+                                stop = commands.index("END", iCommand)+1
+                                iCommand = stop
+                            except ValueError:
+                                print("Procedure {0} started but no END found.".format(str(parameter)))
+                                iCommand += 2
+
+                elif command in procedures:
+                    where_to_go_after_procedures.append(iCommand+1)
+                    iProcedure += 1
+                    iCommand = procedures[command]
+
+                elif command == "END":
+                    iCommand = where_to_go_after_procedures[iProcedure]
+                    where_to_go_after_procedures.pop()
+                    iProcedure -= 1
 
                 else:
                     print("Syntax error : {0} is not a valid command.".format(str(command)))
@@ -198,48 +247,66 @@ def main():
     # WRITE THE SVG   #
     ###################
 
-    write_svg(segments, filename_SVG)
+    write_svg(segments, get_max(segments), filename_SVG)
 
 
 def read_logo(filename):
     with open(filename) as READER_LOGO:
-        return READER_LOGO.read().replace("[", " [ ").replace("]", " ] ").split()
+        return READER_LOGO.read().replace("[", " [ ").replace("]", " ] ").upper().split()
 
 
 def get_min(segments):
-    minx1 = 0
-    miny1 = 0
+    minx = 100
+    miny = 100
 
     for segment in segments:
-        currentx1 = segment[0][0]
-        currenty1 = segment[0][1]
+        currentx1, currentx2 = segment[0][0], segment[1][0]
+        currenty1, currenty2 = segment[0][1], segment[1][1]
 
-        if currentx1 < minx1:
-            minx1 = currentx1
+        if currentx1 < minx or currentx2 < minx:
+            minx = min(currentx1, currentx2)
 
-        if currenty1 < miny1:
-            miny1 = currenty1
+        if currenty1 < miny or currenty2 < miny:
+            miny = min(currenty1, currenty2)
 
-    return minx1, miny1
+    return minx, miny
+
+
+def get_max(segments):
+    maxx = 0
+    maxy = 0
+
+    for segment in segments:
+        currentx1, currentx2 = segment[0][0], segment[1][0]
+        currenty1, currenty2 = segment[0][1], segment[1][1]
+
+        if currentx1 > maxx or currentx2 > maxx:
+            maxx = max(currentx1, currentx2)
+        if currenty1 > maxy or currenty2 > maxy:
+            maxy = max(currenty1, currenty2)
+
+    return maxx, maxy
 
 
 def translate(coordinates, segments):
     for segment in segments:
-        segment[0][0] += -coordinates[0]
-        segment[1][0] += -coordinates[0]
+        segment[0][0] += -coordinates[0]+25
+        segment[1][0] += -coordinates[0]+25
 
-        segment[0][1] += -coordinates[1]
-        segment[1][1] += -coordinates[1]
+        segment[0][1] += -coordinates[1]+25
+        segment[1][1] += -coordinates[1]+25
 
 
 def clamp(x):
     return max(0, min(x, 255))
 
 
-def write_svg(segments, filename):
+def write_svg(segments, max, filename):
     with open(filename, "w") as WRITER_SVG:
         WRITER_SVG.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
-        WRITER_SVG.write("<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"20000\" height=\"20000\">\n")
+        WRITER_SVG.write(
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"{0}\" height=\"{1}\">\n".format(
+                str(max[0]+50), str(max[1]+50)))
         WRITER_SVG.write("<title>Exemple LOGO</title>\n")
         WRITER_SVG.write("<desc>Du LOGO.</desc>\n")
 
@@ -264,15 +331,35 @@ def write_svg(segments, filename):
 
 def get_parameters(commands, iCommand, nb_of_parameters):
     parameters = list()
+    random_switch = 0
 
     try:
-        for loop in range(nb_of_parameters):
-            parameters.append(commands[iCommand+loop+1])
         error = False
+        for loop in range(nb_of_parameters):
+            tmp = commands[iCommand + loop + 1]
+
+            if tmp.upper() == "RANDOM":
+                try:
+                    tmp = commands[iCommand + loop + 2]
+                    tmp = randrange(int(tmp))
+                    random_switch += 1
+                except ValueError:
+                    print("Invalid subparameter {0} for parameter RANDOM in command {1}.".format(str(tmp),str(commands[iCommand])))
+                    random_switch += 2
+                    error = True
+                except IndexError:
+                    print("No subparameter for parameter RANDOM in command {0}.".format(str(commands[iCommand])))
+                    random_switch += 2
+                    error = True
+
+            parameters.append(tmp)
+
     except IndexError:
         print("Not enough parameters for command {0}.".format(str(commands[iCommand])))
         error = True
 
-    return error, parameters[0:nb_of_parameters]
+    #print(parameters)
+    return error, parameters[0:nb_of_parameters], random_switch
+
 
 main()
