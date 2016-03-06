@@ -33,8 +33,6 @@ def main():
     LOGO_COMMANDS = ["FORWARD", "FD", "BACKWARD", "BK", "LEFT", "LT", "RIGHT", "RT", "SETPENCOLOR", "SETWIDTH",
                      "PENDOWN", "PD", "PENUP", "PU", "REPEAT", "RANDOM", "TO"]
 
-    filename_LOGO = "flower.logo"  # Nom du fichier LOGO
-    filename_SVG = "LOGO-ELDLC.svg"  # Nom du fichier SVG
 
     repeat_start = []  # liste contenant l'indice du premier token de chaque REPEAT
     nb_left_repeat = []  # liste contenant le nombre de répétitions restantes pour chaque REPEAT
@@ -58,7 +56,7 @@ def main():
     # WE READ THE LOGO FILE #
     #########################
 
-    commands = read_logo(filename_LOGO)  # Liste des commands
+    commands = read_logo()  # Liste des commands
 
     ############################
     # WE PROCESS THE LOGO FILE #
@@ -253,21 +251,34 @@ def main():
     # WRITE THE SVG   #
     ###################
 
-    write_svg(segments, get_max(segments), filename_SVG)
+    write_svg(segments, get_max(segments))
 
 
-def read_logo(filename):
-    with open(filename) as READER_LOGO:
-        content = READER_LOGO.read() # We read the file
-        content = content.replace("[", " [ ").replace("]", " ] ") # We replace [ by " [ "
+def read_logo():
+    READER_LOGO = None
 
-        while ", " in content:
-            content = content.replace(", ", ",") # We replace ", " by ","
-        while " ," in content:
-            content = content.replace(" ,", ",") # We replace " ," by ","
+    while READER_LOGO is None:
+        try:
+            filename = input("Which *.logo file do you want to open ? ")
 
-        content = content.upper().split() # We UP everything and split
-        return content
+            with open(filename) as READER_LOGO:
+                content = READER_LOGO.read() # We read the file
+                content = content.replace("[", " [ ").replace("]", " ] ") # We replace [ by " [ "
+
+                while ", " in content:
+                    content = content.replace(", ", ",") # We replace ", " by ","
+                while " ," in content:
+                    content = content.replace(" ,", ",") # We replace " ," by ","
+
+                content = content.upper().split() # We UP everything and split
+
+                return content
+        except EnvironmentError as e:
+            print(e.strerror)
+            file = None
+        except UnicodeDecodeError as e:
+            print(e.reason)
+            file = None
 
 
 def get_min(segments):
@@ -316,32 +327,50 @@ def clamp(x):
     return max(0, min(x, 255))
 
 
-def write_svg(segments, max, filename):
-    with open(filename, "w") as WRITER_SVG:
-        WRITER_SVG.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
-        WRITER_SVG.write(
-            "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"{0}\" height=\"{1}\">\n".format(
-                str(max[0]+50), str(max[1]+50)))
-        WRITER_SVG.write("<title>Exemple LOGO</title>\n")
-        WRITER_SVG.write("<desc>Du LOGO.</desc>\n")
+def write_svg(segments, max):
+    WRITER_SVG = None
 
-        for segment in segments:
-            towrite = ""
-            if segment[4]:
-                towrite += "<line x1=\"{0}\" y1=\"{1}\" x2=\"{2}\" y2=\"{3}\" ".format(str(segment[0][0]),
-                                                                                       str(segment[0][1]),
-                                                                                       str(segment[1][0]),
-                                                                                       str(segment[1][1]))
+    while WRITER_SVG is None:
+        try:
+            filename = input("Name of svg file : ")
 
-                towrite += "stroke=\"{0}\" ".format(str(segment[2]))
+            with open(filename, "w") as WRITER_SVG:
+                WRITER_SVG.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
+                WRITER_SVG.write(
+                    "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"{0}\" height=\"{1}\">\n".format(
+                        str(max[0]+50), str(max[1]+50)))
+                WRITER_SVG.write("<title>Exemple LOGO</title>\n")
+                WRITER_SVG.write("<desc>Du LOGO.</desc>\n")
 
-                if segment[3] != 1:
-                    towrite += "stroke-width=\"{0}\" ".format(str(segment[3]))
+                for segment in segments:
+                    towrite = ""
+                    if segment[4]:
+                        towrite += "<line x1=\"{0}\" y1=\"{1}\" x2=\"{2}\" y2=\"{3}\" ".format(str(segment[0][0]),
+                                                                                               str(segment[0][1]),
+                                                                                               str(segment[1][0]),
+                                                                                               str(segment[1][1]))
 
-                towrite += "/>\n"
+                        towrite += "stroke=\"{0}\" ".format(str(segment[2]))
 
-                WRITER_SVG.write(towrite)
-        WRITER_SVG.write("</svg>")
+                        if segment[3] != 1:
+                            towrite += "stroke-width=\"{0}\" ".format(str(segment[3]))
+
+                        towrite += "/>\n"
+
+                        WRITER_SVG.write(towrite)
+                WRITER_SVG.write("</svg>")
+
+                break
+        except EnvironmentError as e:
+            print(e.strerror)
+            file = None
+        except UnicodeDecodeError as e:
+            print(e.reason)
+            file = None
+
+        choix = input("Réessayer (Y/N) ? ")
+        if choix in "nN":
+            break
 
 
 def get_parameters(commands, iCommand, nb_of_parameters):
