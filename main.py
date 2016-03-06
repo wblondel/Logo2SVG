@@ -19,8 +19,9 @@
 # Please read COMMANDS.md
 
 # TODO: Support parameters in procedures
-# TODO: Securely valuate mathematical expressions in parameters (eval is EVIL)
+# TODO: Securely evaluate mathematical expressions in parameters (eval is EVIL)
 # TODO: Optimize SVG
+# TODO: Variable Assignment
 
 
 from math import cos, sin, radians
