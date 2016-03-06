@@ -79,7 +79,7 @@ def main():
                     iCommand = repeat_start[iRepeat]
 
             else:
-                if command == "FORWARD" or command == "FD" or command == "BACKWARD" or command == "BK":
+                if command == "FORWARD" or command == "FD" or command == "FW" or command == "BACKWARD" or command == "BK":
                     error, parameter, random_switch = get_parameters(commands, iCommand, 1)
 
                     if not error:
@@ -133,7 +133,7 @@ def main():
                     else:
                         iCommand += 1+random_switch
 
-                elif command == "SETPENCOLOR":
+                elif command == "SETPENCOLOR" or command == "SETCOLOR":
                     error, parameter, random_switch = get_parameters(commands, iCommand, 1)
 
                     if not error:
@@ -386,7 +386,7 @@ def get_parameters(commands, iCommand, nb_of_parameters):
             if tmp == "RANDOM":
                 try:
                     tmp = commands[iCommand + loop + 2]
-                    tmp = randrange(int(tmp))
+                    tmp = str(randrange(int(tmp)))
                     random_switch += 1
                 except ValueError:
                     print("Invalid subparameter {0} for parameter RANDOM in command {1}.".format(str(tmp),str(commands[iCommand])))
