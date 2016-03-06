@@ -24,8 +24,30 @@ Turtle stops leaving a trail
 ### pendown / pd
 Turtle will leave a trail
 
+[//]: # (### setx x / sety y)
+[//]: # (x : int or float)
+[//]: # (y : int or float)
+
+[//]: # (Move turtle to the specified location)
+
+[//]: # (### setxy x, y)
+[//]: # (x : int or float)
+[//]: # (y : int or float)
+ 
+[//]: # (Move turtle to the specified location)
+
+## Loops and procedure
+### repeat x [ statements ... ]
+x : int
+
+Repeat statements x times
+
+### to PROCNAME statements ... end
+
+Define a new named procedure
+
 ## Colors
-### setcolor x / setcolor color
+### setpencolor x / setpencolor color
 x : int
 
 color : string
@@ -57,9 +79,14 @@ Will set the line color according to the following table:
         <td style='background-color: gray;'>15: gray </td>
 </table>
 
-### setcolor r, g, b
+### setpencolor r, g, b
 r : int
 g : int
 b : int
 
 Will set the line color according to the amount of red, green and blue.
+
+## Math
+### random x
+x : int
+Will choose a random number between 0 and x-1.
