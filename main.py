@@ -1,3 +1,5 @@
+# coding: utf8
+
 # Logo2SVG  Copyright (C) 2016    William Gerald Blondel
 # william.blondel78@gmail.com
 # Last modified 6th March 2016 00.00am
@@ -18,6 +20,7 @@
 # I don't use recursive function because of the maximum recursion depth
 # Please read COMMANDS.md
 
+# TODO: Set turtle position
 # TODO: Support parameters in procedures
 # TODO: Securely evaluate mathematical expressions in parameters (eval is EVIL)
 # TODO: Optimize SVG
@@ -26,14 +29,31 @@
 
 from math import cos, sin, radians
 from random import randrange
+import sys, getopt
 
-def main():
+def main(argv):
     LOGO_STROKES = ["BLACK", "BLUE", "GREEN", "CYAN", "RED", "MAGENTA", "YELLOW", "WHITE", "BROWN", "TAN", "GREEN",
                     "AQUA", "SALMON", "PURPLE", "ORANGE", "GREY"]
 
     LOGO_COMMANDS = ["FORWARD", "FD", "BACKWARD", "BK", "LEFT", "LT", "RIGHT", "RT", "SETPENCOLOR", "SETWIDTH",
                      "PENDOWN", "PD", "PENUP", "PU", "REPEAT", "RANDOM", "TO"]
 
+    FILENAME_LOGO = None
+    FILENAME_SVG = None
+
+    try:
+        opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
+    except getopt.GetoptError:
+        print('main.py -i <inputfile> -o <outputfile>')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print('main.py -i <inputfile> -o <outputfile>')
+            sys.exit()
+        elif opt in ("-i", "--ifile"):
+            FILENAME_LOGO = arg
+        elif opt in ("-o", "--ofile"):
+            FILENAME_SVG = arg
 
     repeat_start = []  # liste contenant l'indice du premier token de chaque REPEAT
     nb_left_repeat = []  # liste contenant le nombre de répétitions restantes pour chaque REPEAT
@@ -57,7 +77,7 @@ def main():
     # WE READ THE LOGO FILE #
     #########################
 
-    commands = read_logo()  # Liste des commands
+    commands = read_logo(FILENAME_LOGO)  # Liste des commands
 
     ############################
     # WE PROCESS THE LOGO FILE #
@@ -90,8 +110,8 @@ def main():
 
                             if len(segments) == 0:
                                 segments.append((
-                                    [100, 100],
-                                    [100 + parameter * cos(angle), 100 + parameter * sin(angle)],
+                                    [0, 0],
+                                    [0 + parameter * cos(angle), 0 + parameter * sin(angle)],
                                     stroke,
                                     stroke_width,
                                     writing
@@ -111,9 +131,9 @@ def main():
                             print("Invalid parameter {0} for command {1}. Turtle did not move.".format(str(parameter),
                                                                                                        str(command)))
 
-                        iCommand += 2+random_switch
+                        iCommand += 2 + random_switch
                     else:
-                        iCommand += 1+random_switch
+                        iCommand += 1 + random_switch
 
                 elif command == "LEFT" or command == "LT" or command == "RIGHT" or command == "RT":
                     error, parameter, random_switch = get_parameters(commands, iCommand, 1)
@@ -129,9 +149,9 @@ def main():
                             print("Invalid parameter {0} for command {1}. Angle did not change.".format(str(parameter),
                                                                                                         str(command)))
 
-                        iCommand += 2+random_switch
+                        iCommand += 2 + random_switch
                     else:
-                        iCommand += 1+random_switch
+                        iCommand += 1 + random_switch
 
                 elif command == "SETPENCOLOR" or command == "SETCOLOR":
                     error, parameter, random_switch = get_parameters(commands, iCommand, 1)
@@ -162,9 +182,9 @@ def main():
                                     print("Invalid parameter {0} for command {1}. Color did not change.".format(
                                         str(parameter), str(command)))
 
-                        iCommand += 2+random_switch
+                        iCommand += 2 + random_switch
                     else:
-                        iCommand += 1+random_switch
+                        iCommand += 1 + random_switch
 
                 elif command == "SETWIDTH":
                     error, parameter, random_switch = get_parameters(commands, iCommand, 1)
@@ -176,9 +196,9 @@ def main():
                             print("Invalid parameter {0} for command {1}. Line width did not change.".format(
                                 str(parameter), str(command)))
 
-                        iCommand += 2+random_switch
+                        iCommand += 2 + random_switch
                     else:
-                        iCommand += 1+random_switch
+                        iCommand += 1 + random_switch
 
                 elif command == "PENDOWN" or command == "PD":
                     writing = True
@@ -197,14 +217,14 @@ def main():
                         except:
                             print("Invalid parameter {0} for command {1}. Repeat ignored.".format(str(parameter),
                                                                                                   str(command)))
-                            iCommand += 1+random_switch
+                            iCommand += 1 + random_switch
                         else:
                             nb_left_repeat.append(parameter)
-                            iCommand += 3+random_switch
+                            iCommand += 3 + random_switch
                             repeat_start.append(iCommand)
                             iRepeat += 1
                     else:
-                        iCommand += 1+random_switch
+                        iCommand += 1 + random_switch
 
                 elif command == "TO":
                     error, parameter, random_switch = get_parameters(commands, iCommand, 1)
@@ -216,17 +236,17 @@ def main():
                             print("Invalid procedure name. {0} is a reserved keyword.".format(str(parameter)))
                             iCommand += 2
                         else:
-                            procedures[parameter] = iCommand+2
+                            procedures[parameter] = iCommand + 2
 
                             try:
-                                stop = commands.index("END", iCommand)+1
+                                stop = commands.index("END", iCommand) + 1
                                 iCommand = stop
                             except ValueError:
                                 print("Procedure {0} started but no END found.".format(str(parameter)))
                                 iCommand += 2
 
                 elif command in procedures:
-                    where_to_go_after_procedures.append(iCommand+1)
+                    where_to_go_after_procedures.append(iCommand + 1)
                     iProcedure += 1
                     iCommand = procedures[command]
 
@@ -252,32 +272,34 @@ def main():
     # WRITE THE SVG   #
     ###################
 
-    write_svg(segments, get_max(segments))
+    write_svg(segments, get_max(segments), FILENAME_SVG)
 
 
-def read_logo():
+def read_logo(FILENAME_LOGO=None):
     READER_LOGO = None
 
     while READER_LOGO is None:
+        if FILENAME_LOGO is None:
+            FILENAME_LOGO = input("Which *.logo file do you want to open ? ")
         try:
-            filename = input("Which *.logo file do you want to open ? ")
-
-            with open(filename) as READER_LOGO:
-                content = READER_LOGO.read() # We read the file
-                content = content.replace("[", " [ ").replace("]", " ] ") # We replace [ by " [ "
+            with open(FILENAME_LOGO) as READER_LOGO:
+                content = READER_LOGO.read()  # We read the file
+                content = content.replace("[", " [ ").replace("]", " ] ")  # We replace [ by " [ "
 
                 while ", " in content:
-                    content = content.replace(", ", ",") # We replace ", " by ","
+                    content = content.replace(", ", ",")  # We replace ", " by ","
                 while " ," in content:
-                    content = content.replace(" ,", ",") # We replace " ," by ","
+                    content = content.replace(" ,", ",")  # We replace " ," by ","
 
-                content = content.upper().split() # We UP everything and split
+                content = content.upper().split()  # We UP everything and split
 
                 return content
         except EnvironmentError as e:
+            FILENAME_LOGO = None
             print(e.strerror)
             file = None
         except UnicodeDecodeError as e:
+            FILENAME_LOGO = None
             print(e.reason)
             file = None
 
@@ -317,29 +339,33 @@ def get_max(segments):
 
 def translate(coordinates, segments):
     for segment in segments:
-        segment[0][0] += -coordinates[0]+25
-        segment[1][0] += -coordinates[0]+25
+        segment[0][0] += -coordinates[0] + 25
+        segment[1][0] += -coordinates[0] + 25
 
-        segment[0][1] += -coordinates[1]+25
-        segment[1][1] += -coordinates[1]+25
+        segment[0][1] += -coordinates[1] + 25
+        segment[1][1] += -coordinates[1] + 25
 
 
 def clamp(x):
     return max(0, min(x, 255))
 
 
-def write_svg(segments, max):
+def write_svg(segments, max, FILENAME_SVG=None):
     WRITER_SVG = None
 
     while WRITER_SVG is None:
+        if FILENAME_SVG is None:
+            #try:
+            FILENAME_SVG = input("Name of svg file : ")
+            #except SyntaxError as e:
+                #print(e)
+                #break
         try:
-            filename = input("Name of svg file : ")
-
-            with open(filename, "w") as WRITER_SVG:
+            with open(FILENAME_SVG, "w") as WRITER_SVG:
                 WRITER_SVG.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
                 WRITER_SVG.write(
                     "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"{0}\" height=\"{1}\">\n".format(
-                        str(max[0]+50), str(max[1]+50)))
+                        str(max[0] + 50), str(max[1] + 50)))
                 WRITER_SVG.write("<title>Exemple LOGO</title>\n")
                 WRITER_SVG.write("<desc>Du LOGO.</desc>\n")
 
@@ -363,9 +389,11 @@ def write_svg(segments, max):
 
                 break
         except EnvironmentError as e:
+            FILENAME_SVG = None
             print(e.strerror)
             file = None
         except UnicodeDecodeError as e:
+            FILENAME_SVG = None
             print(e.reason)
             file = None
 
@@ -389,7 +417,8 @@ def get_parameters(commands, iCommand, nb_of_parameters):
                     tmp = str(randrange(int(tmp)))
                     random_switch += 1
                 except ValueError:
-                    print("Invalid subparameter {0} for parameter RANDOM in command {1}.".format(str(tmp),str(commands[iCommand])))
+                    print("Invalid subparameter {0} for parameter RANDOM in command {1}.".format(str(tmp), str(
+                        commands[iCommand])))
                     random_switch += 2
                     error = True
                 except IndexError:
@@ -403,8 +432,9 @@ def get_parameters(commands, iCommand, nb_of_parameters):
         print("Not enough parameters for command {0}.".format(str(commands[iCommand])))
         error = True
 
-    #print(parameters)
+    # print(parameters)
     return error, parameters[0:nb_of_parameters], random_switch
 
 
-main()
+if __name__ == "__main__":
+    main(sys.argv[1:])
