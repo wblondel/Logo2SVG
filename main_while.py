@@ -70,7 +70,7 @@ def main():
                     if not error:
                         try:
                             parameter = float(parameter[0])
-                            if command == "BK" or command == "BACKWARD":
+                            if "B" in command:
                                 parameter = -parameter
 
                             if len(segments) == 0:
@@ -100,28 +100,16 @@ def main():
                     else:
                         iCommand += 1+random_switch
 
-                elif command == "LEFT" or command == "LT":
+                elif command == "LEFT" or command == "LT" or command == "RIGHT" or command == "RT":
                     error, parameter, random_switch = get_parameters(commands, iCommand, 1)
 
                     if not error:
                         try:
                             parameter = float(parameter[0])
+
+                            if "R" in command:
+                                parameter = -parameter
                             angle -= radians(parameter)
-                        except:
-                            print("Invalid parameter {0} for command {1}. Angle did not change.".format(str(parameter),
-                                                                                                        str(command)))
-
-                        iCommand += 2+random_switch
-                    else:
-                        iCommand += 1+random_switch
-
-                elif command == "RIGHT" or command == "RT":
-                    error, parameter, random_switch = get_parameters(commands, iCommand, 1)
-
-                    if not error:
-                        try:
-                            parameter = float(parameter[0])
-                            angle += radians(parameter)
                         except:
                             print("Invalid parameter {0} for command {1}. Angle did not change.".format(str(parameter),
                                                                                                         str(command)))
