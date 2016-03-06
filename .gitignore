@@ -4,6 +4,9 @@
 *.logo
 *.svg
 
+logo/
+wiki/
+
 # IntelliJ project files
 .idea
 *.iml
