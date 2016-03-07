@@ -35,7 +35,7 @@ def main(argv):
     LOGO_STROKES = ["BLACK", "BLUE", "GREEN", "CYAN", "RED", "MAGENTA", "YELLOW", "WHITE", "BROWN", "TAN", "GREEN",
                     "AQUA", "SALMON", "PURPLE", "ORANGE", "GREY"]
 
-    LOGO_COMMANDS = ["FORWARD", "FD", "BACKWARD", "BK", "LEFT", "LT", "RIGHT", "RT", "SETPENCOLOR", "SETWIDTH",
+    LOGO_COMMANDS = ["FORWARD", "FD", "FW", "BACKWARD", "BK", "LEFT", "LT", "RIGHT", "RT", "SETPENCOLOR", "SETWIDTH",
                      "PENDOWN", "PD", "PENUP", "PU", "REPEAT", "RANDOM", "TO"]
 
     FILENAME_LOGO = None
@@ -82,23 +82,27 @@ def main(argv):
     ############################
     # WE PROCESS THE LOGO FILE #
     ############################
+    toexecute = True
 
     while True:
         if iCommand < len(commands):
             command = commands[iCommand]
 
-            if iRepeat > -1 and command == "]":
-                nb_left_repeat[iRepeat] -= 1
+            if iRepeat > -1: # Si on est dans un REPEAT
+                if command == "]": # Si on arrive à la fin du REPEAT
+                    nb_left_repeat[iRepeat] -= 1
 
-                if nb_left_repeat[iRepeat] == 0:
-                    iCommand += 1
-                    iRepeat -= 1
-                    nb_left_repeat.pop()
-                    repeat_start.pop()
-                else:
-                    iCommand = repeat_start[iRepeat]
+                    if nb_left_repeat[iRepeat] <= 0:
+                        iRepeat -= 1
+                        nb_left_repeat.pop()
+                        repeat_start.pop()
+                        toexecute = True
+                    else:
+                        iCommand = repeat_start[iRepeat]
+                elif nb_left_repeat[iRepeat] <= 0:
+                    toexecute = False
 
-            else:
+            if toexecute:
                 if command == "FORWARD" or command == "FD" or command == "FW" or command == "BACKWARD" or command == "BK":
                     error, parameter, random_switch = get_parameters(commands, iCommand, 1)
 
@@ -255,10 +259,16 @@ def main(argv):
                     where_to_go_after_procedures.pop()
                     iProcedure -= 1
 
+                elif command == "]":
+                    # end of repeat
+                    print("End of loop")
+                    iCommand += 1
+
                 else:
                     print("Syntax error : {0} is not a valid command.".format(str(command)))
                     iCommand += 1
-
+            else:
+                iCommand += 1
         else:
             break
 
@@ -355,11 +365,7 @@ def write_svg(segments, max, FILENAME_SVG=None):
 
     while WRITER_SVG is None:
         if FILENAME_SVG is None:
-            #try:
             FILENAME_SVG = input("Name of svg file : ")
-            #except SyntaxError as e:
-                #print(e)
-                #break
         try:
             with open(FILENAME_SVG, "w") as WRITER_SVG:
                 WRITER_SVG.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
@@ -391,11 +397,9 @@ def write_svg(segments, max, FILENAME_SVG=None):
         except EnvironmentError as e:
             FILENAME_SVG = None
             print(e.strerror)
-            file = None
         except UnicodeDecodeError as e:
             FILENAME_SVG = None
             print(e.reason)
-            file = None
 
         choix = input("Réessayer (Y/N) ? ")
         if choix in "nN":
@@ -432,7 +436,6 @@ def get_parameters(commands, iCommand, nb_of_parameters):
         print("Not enough parameters for command {0}.".format(str(commands[iCommand])))
         error = True
 
-    # print(parameters)
     return error, parameters[0:nb_of_parameters], random_switch
 
 
