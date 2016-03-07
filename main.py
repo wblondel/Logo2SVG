@@ -261,7 +261,6 @@ def main(argv):
 
                 elif command == "]":
                     # end of repeat
-                    print("End of loop")
                     iCommand += 1
 
                 else:
