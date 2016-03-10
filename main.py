@@ -84,7 +84,9 @@ def main(argv):
     ############################
     toexecute = True
 
+
     while True:
+        add = True
         if iCommand < len(commands):
             command = commands[iCommand]
 
@@ -99,6 +101,7 @@ def main(argv):
                         toexecute = True
                     else:
                         iCommand = repeat_start[iRepeat]
+                        add = False
                 elif nb_left_repeat[iRepeat] <= 0:
                     toexecute = False
 
@@ -260,8 +263,10 @@ def main(argv):
                     iProcedure -= 1
 
                 elif command == "]":
-                    # end of repeat
-                    iCommand += 1
+                    if add == True:
+                        iCommand += 1
+                        print("add")
+                        add == False
 
                 else:
                     print("Syntax error : {0} is not a valid command.".format(str(command)))
