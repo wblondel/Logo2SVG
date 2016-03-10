@@ -2,7 +2,7 @@
 
 # Logo2SVG  Copyright (C) 2016    William Gerald Blondel
 # william.blondel78@gmail.com
-# Last modified 6th March 2016 00.00am
+# Last modified 10th March 2016 5.07pm
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -263,9 +263,8 @@ def main(argv):
                     iProcedure -= 1
 
                 elif command == "]":
-                    if add == True:
+                    if add:
                         iCommand += 1
-                        print("add")
                         add == False
 
                 else:
@@ -311,11 +310,9 @@ def read_logo(FILENAME_LOGO=None):
         except EnvironmentError as e:
             FILENAME_LOGO = None
             print(e.strerror)
-            file = None
         except UnicodeDecodeError as e:
             FILENAME_LOGO = None
             print(e.reason)
-            file = None
 
 
 def get_min(segments):
