@@ -2,7 +2,7 @@
 
 # Logo2SVG  Copyright (C) 2017    William Gerald Blondel
 # contact@williamblondel.fr
-# Last modified 2nd April 2017 4.00pm
+# Last modified 2nd April 2017 4.46pm
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -306,6 +306,7 @@ def read_logo(FILENAME_LOGO=None):
                     content = content.replace(" ,", ",")  # We replace " ," by ","
 
                 content = content.upper().split()  # We UP everything and split
+                content[0:0] = ["LEFT", "90"]  # Temporary fix for the Turtle to look UP at the beginning
 
                 return content
         except EnvironmentError as e:
