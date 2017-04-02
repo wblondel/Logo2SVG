@@ -373,7 +373,7 @@ def write_svg(segments, maxi, FILENAME_SVG=None):
                 WRITER_SVG.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
                 WRITER_SVG.write(
                     "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"{0}\" height=\"{1}\">\n".format(
-                        str(max[0] + 50), str(max[1] + 50)))
+                        str(maxi[0]+25), str(maxi[1]+25)))
                 WRITER_SVG.write("<title>Exemple LOGO</title>\n")
                 WRITER_SVG.write("<desc>Du LOGO.</desc>\n")
 
