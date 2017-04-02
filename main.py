@@ -29,7 +29,9 @@
 
 from math import cos, sin, radians
 from random import randrange
-import sys, getopt
+import sys
+import getopt
+
 
 def main(argv):
     LOGO_STROKES = ["BLACK", "BLUE", "GREEN", "CYAN", "RED", "MAGENTA", "YELLOW", "WHITE", "BROWN", "TAN", "GREEN",
@@ -84,14 +86,13 @@ def main(argv):
     ############################
     toexecute = True
 
-
     while True:
         add = True
         if iCommand < len(commands):
             command = commands[iCommand]
 
-            if iRepeat > -1: # Si on est dans un REPEAT
-                if command == "]": # Si on arrive à la fin du REPEAT
+            if iRepeat > -1:  # Si on est dans un REPEAT
+                if command == "]":  # Si on arrive à la fin du REPEAT
                     nb_left_repeat[iRepeat] -= 1
 
                     if nb_left_repeat[iRepeat] <= 0:
@@ -106,7 +107,7 @@ def main(argv):
                     toexecute = False
 
             if toexecute:
-                if command == "FORWARD" or command == "FD" or command == "FW" or command == "BACKWARD" or command == "BK":
+                if command in ["FORWARD", "FD", "FW", "BACKWARD", "BK"]:
                     error, parameter, random_switch = get_parameters(commands, iCommand, 1)
 
                     if not error:
@@ -142,7 +143,7 @@ def main(argv):
                     else:
                         iCommand += 1 + random_switch
 
-                elif command == "LEFT" or command == "LT" or command == "RIGHT" or command == "RT":
+                elif command in ["LEFT", "LT", "RIGHT", "RT"]:
                     error, parameter, random_switch = get_parameters(commands, iCommand, 1)
 
                     if not error:
@@ -160,7 +161,7 @@ def main(argv):
                     else:
                         iCommand += 1 + random_switch
 
-                elif command == "SETPENCOLOR" or command == "SETCOLOR":
+                elif command in ["SETPENCOLOR", "SETCOLOR"]:
                     error, parameter, random_switch = get_parameters(commands, iCommand, 1)
 
                     if not error:
@@ -207,11 +208,11 @@ def main(argv):
                     else:
                         iCommand += 1 + random_switch
 
-                elif command == "PENDOWN" or command == "PD":
+                elif command in ["PENDOWN", "PD"]:
                     writing = True
                     iCommand += 1
 
-                elif command == "PENUP" or command == "PU":
+                elif command in ["PENUP", "PU"]:
                     writing = False
                     iCommand += 1
 
@@ -265,7 +266,7 @@ def main(argv):
                 elif command == "]":
                     if add:
                         iCommand += 1
-                        add == False
+                        add = False
 
                 else:
                     print("Syntax error : {0} is not a valid command.".format(str(command)))
@@ -361,7 +362,7 @@ def clamp(x):
     return max(0, min(x, 255))
 
 
-def write_svg(segments, max, FILENAME_SVG=None):
+def write_svg(segments, maxi, FILENAME_SVG=None):
     WRITER_SVG = None
 
     while WRITER_SVG is None:
