@@ -1,8 +1,9 @@
-# coding: utf8
+# !/usr/bin/python
+# -*- coding: utf-8 -*-
 
 # Logo2SVG  Copyright (C) 2017    William Gerald Blondel
 # contact@williamblondel.fr
-# Last modified 2nd April 2017 4.46pm
+# Last modified 3rd May 2017
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
